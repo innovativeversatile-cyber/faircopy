@@ -1,0 +1,6 @@
+{
+  "name": "faircopy",
+  "private": true,
+  "type": "module",
+  "description": "Photos to PDF on this device. Nothing is uploaded."
+}

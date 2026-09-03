@@ -1,0 +1,27 @@
+# Standalone publish directory if this folder is deployed on its own domain.
+[build]
+  publish = "."
+  command = "echo Fair Copy is static"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=(), payment=(), usb=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; form-action 'self' https:; frame-ancestors 'none'; object-src 'none'; img-src 'self' blob: data:; script-src 'self'; style-src 'self'; connect-src 'self' blob:; worker-src 'self'; font-src 'self'; upgrade-insecure-requests"
+
+[[headers]]
+  for = "/og.png"
+  [headers.values]
+    Cross-Origin-Resource-Policy = "cross-origin"
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0, must-revalidate"

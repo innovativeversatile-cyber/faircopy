@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n="privacy.doc.title">Privacy — Fair Copy</title>
+  <meta name="description" content="Fair Copy runs in your browser. Photos and PDFs are not uploaded." data-i18n="privacy.doc.desc" data-i18n-attr="content">
+  <meta name="theme-color" content="#efe8d8">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js" defer></script>
+  <script type="module" src="locale.js"></script>
+</head>
+<body>
+  <header class="top">
+    <a class="mark" href="./">Fair Copy</a>
+    <nav class="nav" data-i18n="nav.label" data-i18n-attr="aria-label" aria-label="About">
+      <a href="./#how" data-i18n="nav.how">How it works</a>
+      <a href="privacy.html" aria-current="page" data-i18n="nav.privacy">Privacy</a>
+    </nav>
+    <div class="prefs">
+      <label class="vh" for="pref-lang" data-i18n="pref.lang">Language</label>
+      <select id="pref-lang" data-i18n="pref.lang" data-i18n-attr="aria-label" autocomplete="off"></select>
+      <label class="vh" for="pref-currency" data-i18n="pref.currency">Currency</label>
+      <select id="pref-currency" data-i18n="pref.currency" data-i18n-attr="aria-label" autocomplete="off"></select>
+    </div>
+  </header>
+
+  <main class="letter privacy">
+    <p class="kicker" data-i18n="privacy.kicker">A short note</p>
+    <h1 data-i18n="privacy.title">Nothing you photograph is sent to us.</h1>
+    <p data-i18n="privacy.p1">
+      Fair Copy is a static page. The photos you add, the crop, and the PDF are handled in this browser.
+      They are not uploaded to a server, stored in an account, or used to train a model.
+    </p>
+    <p data-i18n="privacy.p2">
+      After the page has loaded, you can turn the network off and still finish the job.
+      A small service worker keeps the page itself available. It does not keep your papers.
+    </p>
+    <p data-i18n="privacy.p3">
+      This site does not use analytics, advertising, or sign-in.
+      Fonts are the ones already on your phone or computer. There are no third-party scripts.
+    </p>
+    <p data-i18n="privacy.p4">
+      If you buy a pass, the card processor sees the payment, not your documents.
+      The pass, language, and currency are saved in this browser. Clearing the site data clears them.
+    </p>
+    <p data-i18n="privacy.p5">
+      If this copy of Fair Copy is hosted by someone else, they can see that the page was requested —
+      the same as any website. They still do not receive the files you drop onto the desk.
+    </p>
+    <p><a href="./" data-i18n="privacy.back">Back to the desk</a></p>
+  </main>
+</body>
+</html>
