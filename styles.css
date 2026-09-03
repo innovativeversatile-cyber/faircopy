@@ -164,17 +164,77 @@ a:hover {
 }
 
 .price-board li {
+  padding: 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.price-buy {
+  appearance: none;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 1rem;
-  padding: 0.55rem 0;
-  border-bottom: 1px solid var(--rule);
+  width: 100%;
+  margin: 0;
+  padding: 0.65rem 0.1rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   font-variant-numeric: tabular-nums;
+  text-align: left;
+  cursor: pointer;
 }
 
-.price-board [data-price] {
+.price-buy:hover,
+.price-buy:focus-visible {
+  color: var(--brass);
+}
+
+.price-side {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  flex-shrink: 0;
+}
+
+.price-buy [data-amt] {
   color: var(--ink);
+  font-weight: 600;
+}
+
+.pay-word {
+  color: var(--brass);
+  font-size: 0.88em;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.price-buy:disabled {
+  cursor: default;
+  color: var(--quiet);
+}
+
+.price-buy:disabled .pay-word {
+  display: none;
+}
+
+.pass-buy {
+  margin: 0 0 1rem;
+  padding: 0.15rem 0 0.35rem;
+}
+
+.pass-buy-lead,
+.done-pay p {
+  margin: 0 0 0.35rem;
+  color: var(--quiet);
+  font-size: 0.95rem;
+}
+
+.pass-buy .price-board,
+.done-pay .price-board,
+.sheet-card .price-board {
+  margin-bottom: 0.85rem;
 }
 
 .pass-note {
@@ -542,15 +602,6 @@ h2 {
   margin-top: 0;
 }
 
-.price-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1rem;
-}
-
-.price-list li {
-  margin: 0.35rem 0;
-}
 
 .noscript {
   margin: 1rem 1.5rem;

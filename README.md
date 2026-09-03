@@ -8,7 +8,7 @@ This is a separate product. It is not part of the marketplace, and it should be 
 
 Open `index.html` over https (or a local server). Take a photo or choose images. Tidy the page if you need to. Make PDF.
 
-Four pages are free. That is enough for a letter, a form, or both sides of a card.
+Three pages are free. That is enough for a letter, a form, or a card.
 
 ## Put it on its own domain
 
@@ -27,6 +27,8 @@ Prices are round local amounts in `config.js`, not live bank rates. That keeps t
 ## Payments
 
 A pass is paid through **VibeCart's Stripe** (the same account as the marketplace). The papers stay on this device. Only the card checkout leaves this page.
+
+Tap a price on the landing list, in the workspace (while you work), or on the three-page limit dialog. You do not have to wait until you hit three pages.
 
 `config.js` points at:
 

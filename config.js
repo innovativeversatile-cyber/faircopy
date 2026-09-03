@@ -3,7 +3,7 @@
 window.FAIRCOPY_CONFIG = {
   siteName: "Fair Copy",
   checkoutBase: "https://vibe-cart.com/api/public/payments/faircopy/checkout",
-  freePages: 4,
+  freePages: 3,
   paidPages: 40,
   passHours: {
     day: 24,

@@ -10,7 +10,7 @@ import {
 } from "./locale.js";
 
 const cfg = window.FAIRCOPY_CONFIG || {};
-const FREE_PAGES = cfg.freePages || 4;
+const FREE_PAGES = cfg.freePages || 3;
 const PAID_PAGES = cfg.paidPages || 40;
 const PASS_KEY = "faircopy.pass";
 const PENDING_KEY = "faircopy.pendingPass";
@@ -102,14 +102,32 @@ function bind() {
   els.passNote = $("pass-note");
 }
 
+function requestAdd(source) {
+  if (state.pages.length >= pageLimit()) {
+    openLimit();
+    return;
+  }
+  if (source === "camera") els.inputCamera.click();
+  else els.inputFiles.click();
+}
+
 function setupEvents() {
-  els.addCamera.addEventListener("click", () => els.inputCamera.click());
-  els.addFiles.addEventListener("click", () => els.inputFiles.click());
-  $("ws-camera")?.addEventListener("click", () => els.inputCamera.click());
-  $("ws-files")?.addEventListener("click", () => els.inputFiles.click());
+  els.addCamera.addEventListener("click", () => requestAdd("camera"));
+  els.addFiles.addEventListener("click", () => requestAdd("files"));
+  $("ws-camera")?.addEventListener("click", () => requestAdd("camera"));
+  $("ws-files")?.addEventListener("click", () => requestAdd("files"));
 
   els.inputCamera.addEventListener("change", () => ingestFiles(els.inputCamera.files));
   els.inputFiles.addEventListener("change", () => ingestFiles(els.inputFiles.files));
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("button.price-buy[data-price]");
+    if (!btn || btn.disabled) return;
+    const plan = btn.getAttribute("data-price");
+    if (!["day", "month", "year"].includes(plan)) return;
+    e.preventDefault();
+    beginPurchase(plan);
+  });
 
   ["dragenter", "dragover"].forEach((name) => {
     document.addEventListener(name, (e) => {
@@ -167,23 +185,52 @@ function currentPage() {
   return state.pages[state.selected] || null;
 }
 
-async function ingestFiles(fileList) {
-  const files = [...(fileList || [])].filter((f) => f.type.startsWith("image/") || /\.heic$/i.test(f.name));
+let ingestChain = Promise.resolve();
+
+function ingestFiles(fileList) {
+  const files = [...(fileList || [])];
+  resetInputs();
+  ingestChain = ingestChain.then(() => ingestFilesNow(files)).catch(() => {});
+  return ingestChain;
+}
+
+function trimToLimit() {
+  const cap = pageLimit();
+  let trimmed = false;
+  while (state.pages.length > cap) {
+    const extra = state.pages.pop();
+    extra?.bitmap?.close?.();
+    trimmed = true;
+  }
+  if (state.selected >= state.pages.length) {
+    state.selected = Math.max(0, state.pages.length - 1);
+  }
+  return trimmed;
+}
+
+async function ingestFilesNow(fileList) {
+  const files = fileList.filter((f) => f.type.startsWith("image/") || /\.heic$/i.test(f.name));
   if (!files.length) {
     setStatus(t("err.notImage"));
     return;
   }
-  const room = pageLimit() - state.pages.length;
-  if (room <= 0) {
+  let blocked = state.pages.length >= pageLimit();
+  if (blocked) {
     openLimit();
-    resetInputs();
     return;
   }
-  const take = files.slice(0, room);
-  const skipped = files.length - take.length;
-  for (const file of take) {
+  for (const file of files) {
+    if (state.pages.length >= pageLimit()) {
+      blocked = true;
+      break;
+    }
     try {
       const bitmap = await bitmapFromBlob(file);
+      if (state.pages.length >= pageLimit()) {
+        bitmap.close?.();
+        blocked = true;
+        break;
+      }
       state.pages.push({
         id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
         name: file.name || "page",
@@ -196,10 +243,10 @@ async function ingestFiles(fileList) {
       setStatus(t("err.heic"));
     }
   }
-  if (skipped > 0) openLimit();
-  state.selected = state.pages.length - 1;
-  resetInputs();
+  if (trimToLimit()) blocked = true;
+  if (state.pages.length) state.selected = state.pages.length - 1;
   renderAll();
+  if (blocked) openLimit();
   $("workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -376,6 +423,7 @@ function renderChrome() {
   const multi = n > 1;
   $("page-up")?.toggleAttribute("hidden", !multi);
   $("page-down")?.toggleAttribute("hidden", !multi);
+  syncPaySurfaces();
 }
 
 function renderLooks() {
@@ -451,6 +499,7 @@ function beginPurchase(plan) {
 
 async function writePdf() {
   if (!state.pages.length || state.busy) return;
+  if (trimToLimit()) renderAll();
   if (state.pages.length > pageLimit()) {
     openLimit();
     return;
@@ -520,10 +569,19 @@ function startOver() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function planLabel(plan) {
-  const amount = passAmount(plan);
-  if (amount == null) return t("plan." + plan);
-  return `${t("plan." + plan)} · ${formatMoney(amount)}`;
+function syncPaySurfaces() {
+  const paid = hasPass();
+  const canPay = hasAnyPayment();
+  const passBuy = $("pass-buy");
+  if (passBuy) passBuy.hidden = paid || !canPay;
+  const donePay = $("done-pay");
+  if (donePay) donePay.hidden = paid || !canPay;
+  document.querySelectorAll("button.price-buy[data-price]").forEach((btn) => {
+    const plan = btn.getAttribute("data-price");
+    btn.disabled = !paymentUrl(plan);
+  });
+  const split = $("limit-split");
+  if (split) split.hidden = canPay;
 }
 
 function fillPrices() {
@@ -531,32 +589,15 @@ function fillPrices() {
     const plan = el.getAttribute("data-price");
     const amount = passAmount(plan);
     if (amount == null) return;
-    el.textContent = formatMoney(amount);
+    const formatted = formatMoney(amount);
+    const amt = el.querySelector("[data-amt]");
+    if (amt) amt.textContent = formatted;
+    else el.textContent = formatted;
+    if (el.matches("button")) {
+      el.setAttribute("aria-label", `${t("plan." + plan)} · ${formatted} · ${t("prices.pay")}`);
+    }
   });
-  const list = $("limit-price-list");
-  if (list) {
-    list.innerHTML = "";
-    ["day", "month", "year"].forEach((plan) => {
-      const amount = passAmount(plan);
-      if (amount == null) return;
-      const li = document.createElement("li");
-      const url = paymentUrl(plan);
-      const label = planLabel(plan);
-      if (url) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "text-btn";
-        btn.textContent = label;
-        btn.addEventListener("click", () => beginPurchase(plan));
-        li.appendChild(btn);
-      } else {
-        li.textContent = label;
-      }
-      list.appendChild(li);
-    });
-  }
-  const split = $("limit-split");
-  if (split) split.hidden = hasAnyPayment();
+  syncPaySurfaces();
 }
 
 function refreshDoneSaved(name) {
