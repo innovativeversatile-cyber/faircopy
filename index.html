@@ -73,7 +73,7 @@
         </div>
 
         <div class="pass-buy" id="pass-buy">
-          <p class="pass-buy-lead" data-i18n="prices.workspace">Need more than three pages? Pay here — you do not have to wait until you hit the limit.</p>
+          <p class="pass-buy-lead" data-i18n="prices.workspace">Need another PDF, or more than three pages? Pay here.</p>
           <ul class="price-board" id="pass-buy-list">
             <li>
               <button type="button" class="price-buy" data-price="day">
@@ -168,13 +168,12 @@
         Do not use it to alter identity papers in order to deceive anyone.
       </p>
       <p data-i18n="what.p2">
-        Three pages are free — enough for a letter, a form, or a card.
-        A longer packet can be split into two PDFs, or unlocked with a pass.
+        Three pages are free — one PDF on this device. After that, a pass unlocks more copies.
       </p>
 
-      <h2 id="prices" data-i18n="prices.title">If you need more than three pages</h2>
+      <h2 id="prices" data-i18n="prices.title">If you need another PDF</h2>
       <p data-i18n="prices.hint">
-        A pass stays on this device. Prices are set in the currency you choose — they are not live bank rates. You can also split a long packet into two PDFs.
+        A pass stays on this device. Prices are set in the currency you choose — they are not live bank rates. One free PDF of three pages, then a pass.
       </p>
       <ul class="price-board" id="price-board">
         <li>
@@ -209,7 +208,7 @@
 
   <footer class="foot">
     <p data-i18n="foot.p1">Fair Copy is a page in your browser. There is no file locker and no mailing list.</p>
-    <p><a href="privacy.html" data-i18n="foot.privacy">Privacy</a> · <span data-i18n="foot.free">Three pages free</span> · 2026</p>
+    <p><a href="privacy.html" data-i18n="foot.privacy">Privacy</a> · <span data-i18n="foot.free">One free PDF</span> · 2026</p>
   </footer>
 
   <input id="input-camera" type="file" accept="image/*" capture="environment" hidden>
@@ -217,8 +216,8 @@
 
   <div class="sheet" id="limit-sheet" hidden role="dialog" aria-labelledby="limit-title" aria-hidden="true">
     <div class="sheet-card">
-      <h2 id="limit-title" data-i18n="limit.title">Three pages on the free copy</h2>
-      <p data-i18n="limit.p">That is enough for a letter or a short form. Remove a page, or make this PDF and start another.</p>
+      <h2 id="limit-title">Three pages on the free copy</h2>
+      <p id="limit-copy">That is the free copy on this device. Make this PDF, or pay for a longer packet.</p>
       <div id="limit-payments">
         <p data-i18n="limit.paid">For a long packet, a pass stays on this device only:</p>
         <ul class="price-board" id="limit-price-list">
@@ -253,7 +252,7 @@
       <p id="done-saved">Saved as <strong id="done-filename">Fair-Copy.pdf</strong>. It was not uploaded.</p>
       <p class="hint" data-i18n="done.hint">If the file did not appear, look in Downloads — or open this page in your browser, not inside a chat app.</p>
       <div class="done-pay" id="done-pay">
-        <p data-i18n="done.payHint">Need a longer packet next time? A pass stays on this device.</p>
+        <p data-i18n="done.payHint">The free copy is used. A pass unlocks more PDFs on this device.</p>
         <ul class="price-board" id="done-price-list">
           <li>
             <button type="button" class="price-buy" data-price="day">

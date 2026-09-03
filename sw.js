@@ -1,4 +1,4 @@
-const CACHE = "faircopy-v5";
+const CACHE = "faircopy-v6";
 const SHELL = [
   "./",
   "./index.html",

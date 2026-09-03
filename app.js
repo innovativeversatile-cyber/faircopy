@@ -14,6 +14,7 @@ const FREE_PAGES = cfg.freePages || 3;
 const PAID_PAGES = cfg.paidPages || 40;
 const PASS_KEY = "faircopy.pass";
 const PENDING_KEY = "faircopy.pendingPass";
+const USED_FREE_KEY = "faircopy.usedFree";
 
 const state = {
   pages: [],
@@ -60,6 +61,27 @@ function passLabel() {
   }
 }
 
+function hasUsedFree() {
+  try {
+    return localStorage.getItem(USED_FREE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function needsPass() {
+  return !hasPass() && hasUsedFree();
+}
+
+function markFreeUsed() {
+  if (hasPass()) return;
+  try {
+    localStorage.setItem(USED_FREE_KEY, "1");
+  } catch {
+    /* private mode */
+  }
+}
+
 function honorReturningPayment() {
   const params = new URLSearchParams(location.search);
   const plan = params.get("pass");
@@ -103,8 +125,12 @@ function bind() {
 }
 
 function requestAdd(source) {
+  if (needsPass()) {
+    openLimit("used");
+    return;
+  }
   if (state.pages.length >= pageLimit()) {
-    openLimit();
+    openLimit("pages");
     return;
   }
   if (source === "camera") els.inputCamera.click();
@@ -214,9 +240,13 @@ async function ingestFilesNow(fileList) {
     setStatus(t("err.notImage"));
     return;
   }
+  if (needsPass()) {
+    openLimit("used");
+    return;
+  }
   let blocked = state.pages.length >= pageLimit();
   if (blocked) {
-    openLimit();
+    openLimit("pages");
     return;
   }
   for (const file of files) {
@@ -246,7 +276,7 @@ async function ingestFilesNow(fileList) {
   if (trimToLimit()) blocked = true;
   if (state.pages.length) state.selected = state.pages.length - 1;
   renderAll();
-  if (blocked) openLimit();
+  if (blocked) openLimit("pages");
   $("workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -411,10 +441,17 @@ function renderChrome() {
     ? els.make.dataset.busyText || t("btn.make")
     : t("btn.make");
   if (els.passNote) {
-    const text = passLabel();
-    els.passNote.textContent = text;
-    els.passNote.hidden = !text;
+    if (needsPass()) {
+      els.passNote.textContent = t("pass.used");
+      els.passNote.hidden = false;
+    } else {
+      const text = passLabel();
+      els.passNote.textContent = text;
+      els.passNote.hidden = !text;
+    }
   }
+  const another = $("another");
+  if (another) another.textContent = t(needsPass() ? "done.anotherPaid" : "done.another");
   const count = $("page-count");
   if (count) {
     const key = n === 1 ? "count.one" : "count";
@@ -485,7 +522,18 @@ function setSheet(el, open) {
   el.setAttribute("aria-hidden", open ? "false" : "true");
 }
 
-function openLimit() {
+let limitReason = "pages";
+
+function refreshLimitCopy() {
+  const title = $("limit-title");
+  const body = $("limit-copy");
+  if (title) title.textContent = t(limitReason === "used" ? "limit.used.title" : "limit.title");
+  if (body) body.textContent = t(limitReason === "used" ? "limit.used.p" : "limit.p");
+}
+
+function openLimit(reason) {
+  limitReason = reason || (needsPass() ? "used" : "pages");
+  refreshLimitCopy();
   fillPrices();
   setSheet(els.limitSheet, true);
 }
@@ -499,9 +547,13 @@ function beginPurchase(plan) {
 
 async function writePdf() {
   if (!state.pages.length || state.busy) return;
+  if (needsPass()) {
+    openLimit("used");
+    return;
+  }
   if (trimToLimit()) renderAll();
   if (state.pages.length > pageLimit()) {
-    openLimit();
+    openLimit("pages");
     return;
   }
   state.busy = true;
@@ -523,6 +575,7 @@ async function writePdf() {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
     refreshDoneSaved(name);
+    markFreeUsed();
     setSheet(els.doneSheet, true);
   } catch (err) {
     setStatus(err?.message || t("err.pdf"));
@@ -567,6 +620,7 @@ function startOver() {
   setSheet(els.doneSheet, false);
   renderAll();
   window.scrollTo({ top: 0, behavior: "smooth" });
+  if (needsPass()) openLimit("used");
 }
 
 function syncPaySurfaces() {
@@ -617,6 +671,7 @@ function refreshDoneSaved(name) {
 onLocaleChange(() => {
   fillPrices();
   renderChrome();
+  refreshLimitCopy();
   els.film?.querySelectorAll(".thumb").forEach((btn, i) => {
     btn.setAttribute("aria-label", t("page", { n: i + 1 }));
   });
