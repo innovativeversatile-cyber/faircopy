@@ -24,17 +24,17 @@ Language and currency stay in this browser (`faircopy.lang`, `faircopy.currency`
 
 Prices are round local amounts in `config.js`, not live bank rates. That keeps the page offline. A pass is still only a date saved here.
 
-## Payments later
+## Payments
 
-Edit `config.js` and paste Stripe Payment Links. Each link should return to this page with:
+A pass is paid through **VibeCart's Stripe** (the same account as the marketplace). The papers stay on this device. Only the card checkout leaves this page.
 
-- `?pass=day`
-- `?pass=month`
-- `?pass=year`
+`config.js` points at:
 
-Optional per-currency links: `paymentLinks.EUR.day`, and so on. If a currency has no link, the amounts still show; buying is offered only when a link exists.
+`https://vibe-cart.com/api/public/payments/faircopy/checkout`
 
-The pass is stored in this browser only. Clearing site data clears it. The card processor never sees the documents.
+After payment, Stripe returns here with `?pass=day` (or month / year). The pass is a date in this browser. Clearing site data clears it.
+
+Optional overrides: `paymentLinks.EUR.day`, and so on.
 
 ## What it does not do
 

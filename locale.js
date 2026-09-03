@@ -740,7 +740,20 @@ export function paymentUrl(plan) {
   const links = cfg.paymentLinks || {};
   const cur = getCurrency();
   if (links[cur] && links[cur][plan]) return links[cur][plan];
-  if (typeof links[plan] === "string") return links[plan];
+  if (typeof links[plan] === "string" && links[plan]) return links[plan];
+  const base = String(cfg.checkoutBase || "").trim();
+  if (base && ["day", "month", "year"].includes(plan)) {
+    let ret = "";
+    try {
+      const path = String(location.pathname || "/").replace(/index\.html$/i, "") || "/";
+      ret = `${location.origin}${path}`;
+    } catch {
+      ret = "";
+    }
+    const q = new URLSearchParams({ plan, currency: cur });
+    if (ret) q.set("return", ret);
+    return `${base}?${q.toString()}`;
+  }
   return "";
 }
 

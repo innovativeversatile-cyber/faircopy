@@ -1,8 +1,8 @@
-/* Payment links are optional. Leave blank until a card processor is connected.
-   Stripe Payment Links should return to this page with ?pass=day|month|year
-   Optional per-currency: paymentLinks.EUR.day = "https://..." */
+/* Pays through VibeCart's Stripe (same keys as the marketplace).
+   Optional overrides: paymentLinks.day or paymentLinks.EUR.day = "https://..." */
 window.FAIRCOPY_CONFIG = {
   siteName: "Fair Copy",
+  checkoutBase: "https://vibe-cart.com/api/public/payments/faircopy/checkout",
   freePages: 4,
   paidPages: 40,
   passHours: {
